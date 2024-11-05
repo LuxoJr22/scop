@@ -9,7 +9,8 @@
 #include "stb_image.h"
 
 #define GLM_ENABLE_EXPERIMENTAL
-#include <glm/gtx/hash.hpp>
+
+#include "utils.hpp"
 
 #define TINYOBJLOADER_IMPLEMENTATION
 #include "tiny_obj_loader.h"
@@ -59,10 +60,14 @@ static std::vector<char> readFile(const std::string& filename) {
 	return buffer;
 }
 
+float degToRadians(float angle) {
+	return (angle * (3.14159265 / 180));
+}
+
 struct Vertex {
-    glm::vec3 pos;
-    glm::vec3 color;
-    glm::vec2 texCoord;
+    vector3 pos;
+    vector3 color;
+    vector2 texCoord;
 
     static VkVertexInputBindingDescription getBindingDescription() {
         VkVertexInputBindingDescription bindingDescription{};
@@ -101,11 +106,26 @@ struct Vertex {
 };
 
 namespace std {
+	template<> struct hash<vector3> {
+        size_t operator()(vector3 const& pos) const {
+            return ((hash<float>()(pos.x) ^
+                   (hash<float>()(pos.y) << 1)) >> 1) ^
+                   (hash<float>()(pos.z) << 1);
+        }
+    };
+
+	template<> struct hash<vector2> {
+        size_t operator()(vector2 const& pos) const {
+            return (hash<float>()(pos.x)) ^
+                   (hash<float>()(pos.y) << 1);
+        }
+    };
+
     template<> struct hash<Vertex> {
         size_t operator()(Vertex const& vertex) const {
-            return ((hash<glm::vec3>()(vertex.pos) ^
-                   (hash<glm::vec3>()(vertex.color) << 1)) >> 1) ^
-                   (hash<glm::vec2>()(vertex.texCoord) << 1);
+            return ((hash<vector3>()(vertex.pos) ^
+                   (hash<vector3>()(vertex.color) << 1)) >> 1) ^
+                   (hash<vector2>()(vertex.texCoord) << 1);
         }
     };
 }
@@ -292,6 +312,7 @@ private:
 				indices.push_back(uniqueVertices[vertex]);
 			}
 		}
+		std::cout << shapes[0].mesh.indices.size() << std::endl;
 	}
 
 	void createDepthResources() {
@@ -808,11 +829,12 @@ private:
 		float time = std::chrono::duration<float, std::chrono::seconds::period>(currentTime - startTime).count();
 
 		UniformBufferObject ubo{};
-		ubo.model = glm::mat4(1.0f); 
-		ubo.model = glm::rotate(glm::mat4(1.0f), time * glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+		//ubo.model = glm::mat4(1.0f); 
+		ubo.model = glm::mat4(1.0f);
+		//ubo.model = glm::rotate(glm::mat4(1.0f), time * degToRadians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 		//ubo.model = glm::rotate(ubo.model, glm::radians(90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
 		ubo.view = glm::lookAt(glm::vec3(5.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-		ubo.proj = glm::perspective(glm::radians(90.0f), swapChainExtent.width / (float) swapChainExtent.height, 0.1f, 10.0f);
+		ubo.proj = glm::perspective(degToRadians(90.0f), swapChainExtent.width / (float) swapChainExtent.height, 0.1f, 10.0f);
 		ubo.proj[1][1] *= -1;
 
 		memcpy(uniformBuffersMapped[currentImage], &ubo, sizeof(ubo));
