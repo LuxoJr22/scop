@@ -279,6 +279,9 @@ private:
 		std::vector<tinyobj::shape_t> shapes;
 		std::vector<tinyobj::material_t> materials;
 		std::string warn, err;
+		attributes att;
+
+		Load_obj(&att, MODEL_PATH.c_str());
 
 		if (!tinyobj::LoadObj(&attrib, &shapes, &materials, &warn, &err, MODEL_PATH.c_str())) {
 			throw std::runtime_error(warn + err);
@@ -286,33 +289,56 @@ private:
 
 		std::unordered_map<Vertex, uint32_t> uniqueVertices{};
 
-		for (const auto& shape : shapes) {
-			for (const auto& index : shape.mesh.indices) {
-				Vertex vertex{};
+		for (const auto& vertice : att.vertices) {
+			Vertex vertex{};
 
-				vertex.pos = {
-					attrib.vertices[3 * index.vertex_index + 0],
-					attrib.vertices[3 * index.vertex_index + 1],
-					attrib.vertices[3 * index.vertex_index + 2]
-				};
-			
-				// vertex.texCoord = {
-				// 	attrib.texcoords[2 * index.texcoord_index + 0],
-				// 	1.0f - attrib.texcoords[2 * index.texcoord_index + 1]
-				// };
+			vertex.pos = {
+				vertice.x,
+				vertice.y,
+				vertice.z
+			};
 
-				vertex.color = {1.0f, 1.0f, 1.0f};
+			vertex.color = {1.0f, 1.0f, 1.0f};
 
-				if (uniqueVertices.count(vertex) == 0) {
-					uniqueVertices[vertex] = static_cast<uint32_t>(vertices.size());
-					vertices.push_back(vertex);
-				}
-
+			if (uniqueVertices.count(vertex) == 0) {
+				uniqueVertices[vertex] = static_cast<uint32_t>(vertices.size());
 				vertices.push_back(vertex);
-				indices.push_back(uniqueVertices[vertex]);
 			}
+
+			vertices.push_back(vertex);
+			indices.push_back(uniqueVertices[vertex]);
 		}
-		std::cout << shapes[0].mesh.indices.size() << std::endl;
+		std::cout << indices.size() << std::endl;
+		std::cout << vertices.size() << std::endl;
+
+		// for (const auto& shape : shapes) {
+		// 	for (const auto& index : shape.mesh.indices) {
+		// 		Vertex vertex{};
+
+		// 		vertex.pos = {
+		// 			attrib.vertices[3 * index.vertex_index + 0],
+		// 			attrib.vertices[3 * index.vertex_index + 1],
+		// 			attrib.vertices[3 * index.vertex_index + 2]
+		// 		};
+			
+		// 		// vertex.texCoord = {
+		// 		// 	attrib.texcoords[2 * index.texcoord_index + 0],
+		// 		// 	1.0f - attrib.texcoords[2 * index.texcoord_index + 1]
+		// 		// };
+
+		// 		vertex.color = {1.0f, 1.0f, 1.0f};
+
+		// 		if (uniqueVertices.count(vertex) == 0) {
+		// 			uniqueVertices[vertex] = static_cast<uint32_t>(vertices.size());
+		// 			vertices.push_back(vertex);
+		// 		}
+
+		// 		vertices.push_back(vertex);
+		// 		indices.push_back(uniqueVertices[vertex]);
+		// 	}
+		// }
+		// std::cout << indices.size() << std::endl;
+		// std::cout << vertices.size() << std::endl;
 	}
 
 	void createDepthResources() {
@@ -831,7 +857,7 @@ private:
 		UniformBufferObject ubo{};
 		//ubo.model = glm::mat4(1.0f); 
 		ubo.model = glm::mat4(1.0f);
-		//ubo.model = glm::rotate(glm::mat4(1.0f), time * degToRadians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+		ubo.model = glm::rotate(glm::mat4(1.0f), time * degToRadians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 		//ubo.model = glm::rotate(ubo.model, glm::radians(90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
 		ubo.view = glm::lookAt(glm::vec3(5.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 		ubo.proj = glm::perspective(degToRadians(90.0f), swapChainExtent.width / (float) swapChainExtent.height, 0.1f, 10.0f);

@@ -3,6 +3,27 @@
 
 #include <array>
 #include <math.h> 
+#include <vector>
+
+struct vert {
+	float x;
+	float y;
+	float z;
+};
+
+struct face {
+	bool isTriangle;
+
+	float vertices[4];
+
+	float tris[2][3];
+
+};
+
+struct attributes {
+	std::vector<vert> vertices;
+	std::vector<face> faces;
+};
 
 
 struct vector3
@@ -35,6 +56,8 @@ struct vector2
 		return x == other.x && y == other.y;
 	}
 };
+
+void Load_obj(attributes *att, const char *filename);
 
 // struct mat4
 // {
