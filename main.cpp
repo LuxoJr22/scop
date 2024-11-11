@@ -235,6 +235,7 @@ private:
 	std::vector<VkDescriptorSet> descriptorSets;
 
 	std::vector<Vertex> vertices;
+	std::unordered_map<Vertex, uint32_t> uniqueVertices{};
 	std::vector<uint32_t> indices;
 
 
@@ -274,6 +275,30 @@ private:
 		createSyncObjects();
 	}
 
+	void fill_indices(const float tris[3], attributes att)
+	{
+		for (int i = 0; i < 3; i ++)
+		{
+			Vertex vertex{};
+			vert verte = att.vertices[tris[i]];
+
+			vertex.pos = {
+				verte.x,
+				verte.y,
+				verte.z
+			};
+
+			vertex.color = {0.1f, 1.0f, 1.0f};
+
+			if (uniqueVertices.count(vertex) == 0) {
+				uniqueVertices[vertex] = static_cast<uint32_t>(vertices.size());
+				vertices.push_back(vertex);
+			}
+				
+			indices.push_back(uniqueVertices[vertex]);
+		}
+	}
+
 	void loadModel() {
 		tinyobj::attrib_t attrib;
 		std::vector<tinyobj::shape_t> shapes;
@@ -287,29 +312,39 @@ private:
 			throw std::runtime_error(warn + err);
 		}
 
-		std::unordered_map<Vertex, uint32_t> uniqueVertices{};
-
-		for (const auto& vertice : att.vertices) {
-			Vertex vertex{};
-
-			vertex.pos = {
-				vertice.x,
-				vertice.y,
-				vertice.z
-			};
-
-			vertex.color = {1.0f, 1.0f, 1.0f};
-
-			if (uniqueVertices.count(vertex) == 0) {
-				uniqueVertices[vertex] = static_cast<uint32_t>(vertices.size());
-				vertices.push_back(vertex);
-			}
-
-			vertices.push_back(vertex);
-			indices.push_back(uniqueVertices[vertex]);
+		for (const auto& faces : att.faces) {
+			fill_indices(faces.tris[0], att);
+			if (faces.isTriangle == false)
+				fill_indices(faces.tris[1], att);
 		}
-		std::cout << indices.size() << std::endl;
-		std::cout << vertices.size() << std::endl;
+		// std::cout << indices.size() << std::endl;
+		// std::cout << vertices.size() << std::endl;
+		// for (int i = 0; i < indices.size(); i ++)
+		// 	std::cout << indices[i] << std::endl;
+
+
+		// std::unordered_map<Vertex, uint32_t> uniqueVertices{};
+
+		// for (const auto& vertice : att.vertices) {
+		// 	Vertex vertex{};
+
+		// 	vertex.pos = {
+		// 		vertice.x,
+		// 		vertice.y,
+		// 		vertice.z
+		// 	};
+
+		// 	vertex.color = {1.0f, 1.0f, 1.0f};
+
+		// 	if (uniqueVertices.count(vertex) == 0) {
+		// 		uniqueVertices[vertex] = static_cast<uint32_t>(vertices.size());
+		// 		vertices.push_back(vertex);
+		// 	}
+
+		// 	indices.push_back(uniqueVertices[vertex]);
+		// }
+		// std::cout << indices.size() << std::endl;
+		// std::cout << vertices.size() << std::endl;
 
 		// for (const auto& shape : shapes) {
 		// 	for (const auto& index : shape.mesh.indices) {
@@ -333,12 +368,14 @@ private:
 		// 			vertices.push_back(vertex);
 		// 		}
 
-		// 		vertices.push_back(vertex);
+		// 		//vertices.push_back(vertex);
 		// 		indices.push_back(uniqueVertices[vertex]);
 		// 	}
 		// }
 		// std::cout << indices.size() << std::endl;
 		// std::cout << vertices.size() << std::endl;
+		// for (int i = 0; i < indices.size(); i ++)
+		// 	std::cout << indices[i] << std::endl;
 	}
 
 	void createDepthResources() {
@@ -387,8 +424,8 @@ private:
 		VkPhysicalDeviceProperties properties{};
 		vkGetPhysicalDeviceProperties(physicalDevice, &properties);
 
-		samplerInfo.anisotropyEnable = VK_TRUE;
-		samplerInfo.maxAnisotropy = properties.limits.maxSamplerAnisotropy;
+		samplerInfo.anisotropyEnable = VK_FALSE;
+		samplerInfo.maxAnisotropy = 1.0f;
 
 		samplerInfo.borderColor = VK_BORDER_COLOR_INT_OPAQUE_BLACK;
 		samplerInfo.unnormalizedCoordinates = VK_FALSE;
@@ -1302,7 +1339,7 @@ private:
 		}
 
 		VkPhysicalDeviceFeatures deviceFeatures{};
-		deviceFeatures.samplerAnisotropy = VK_TRUE;
+		//deviceFeatures.samplerAnisotropy = VK_TRUE;
 
 		VkDeviceCreateInfo createInfo{};
 		createInfo.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
@@ -1366,7 +1403,7 @@ private:
 		VkPhysicalDeviceFeatures supportedFeatures;
     	vkGetPhysicalDeviceFeatures(device, &supportedFeatures);
 
-    	return indices.isComplete() && extensionsSupported && swapChainAdequate && supportedFeatures.samplerAnisotropy;
+    	return indices.isComplete() && extensionsSupported && swapChainAdequate;
 	}
 
 	bool checkDeviceExtensionSupport(VkPhysicalDevice device) {

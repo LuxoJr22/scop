@@ -21,6 +21,38 @@ std::array<float, 4> splitted_line(std::string line)
 }
 
 
+void make_triangles(face *face, attributes *att)
+{
+	vert v0 = att->vertices[face->vertices[0]];
+	vert v1 = att->vertices[face->vertices[1]];
+	vert v2 = att->vertices[face->vertices[2]];
+	vert v3 = att->vertices[face->vertices[3]];
+
+	float sqr02 = ((v2.x - v0.x) * (v2.x - v0.x)) + ((v2.y - v0.y) * (v2.y - v0.y)) + ((v2.z - v0.z) * (v2.z - v0.z));
+	float sqr13 = ((v3.x - v1.x) * (v3.x - v1.x)) + ((v3.y - v1.y) * (v3.y - v1.y)) + ((v3.z - v1.z) * (v3.z - v1.z));
+
+	if (sqr02 < sqr13)
+	{
+		face->tris[0][0] = face->vertices[0];
+		face->tris[0][1] = face->vertices[1];
+	 	face->tris[0][2] = face->vertices[2];
+
+		face->tris[1][0] = face->vertices[0];
+		face->tris[1][1] = face->vertices[2];
+	 	face->tris[1][2] = face->vertices[3];
+	}
+	else
+	{
+		face->tris[0][0] = face->vertices[0];
+		face->tris[0][1] = face->vertices[1];
+	 	face->tris[0][2] = face->vertices[3];
+
+		face->tris[1][0] = face->vertices[1];
+		face->tris[1][1] = face->vertices[2];
+	 	face->tris[1][2] = face->vertices[3];
+	}
+}
+
 void Load_obj(attributes *att, const char *filename)
 {
 	std::ifstream file;
@@ -56,7 +88,7 @@ void Load_obj(attributes *att, const char *filename)
 				face.vertices[2] = number[2];
 				face.vertices[3] = number[3];
 
-				if (number[3] != -1)
+				if (number[3] == -1)
 					face.isTriangle = true;
 				else
 					face.isTriangle = false;
@@ -69,18 +101,9 @@ void Load_obj(attributes *att, const char *filename)
 
 					att->faces.push_back(face);
 				}
-				else 
+				else
 				{
-					face.tris[0][0] = face.vertices[0];
-					face.tris[0][1] = face.vertices[1];
-					face.tris[0][2] = face.vertices[2];
-
-					att->faces.push_back(face);
-
-					face.tris[0][0] = face.vertices[3];
-					face.tris[0][1] = face.vertices[1];
-					face.tris[0][2] = face.vertices[2];
-
+					make_triangles(&face, att);
 					att->faces.push_back(face);
 				}
 			}
