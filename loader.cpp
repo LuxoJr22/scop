@@ -83,10 +83,10 @@ void Load_obj(attributes *att, const char *filename)
 
 				face face;
 
-				face.vertices[0] = number[0];
-				face.vertices[1] = number[1];
-				face.vertices[2] = number[2];
-				face.vertices[3] = number[3];
+				face.vertices[0] = number[0] - 1;
+				face.vertices[1] = number[1] - 1;
+				face.vertices[2] = number[2] - 1;
+				face.vertices[3] = number[3] - 1;
 
 				if (number[3] == -1)
 					face.isTriangle = true;
