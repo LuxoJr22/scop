@@ -1,9 +1,26 @@
 #ifndef UTILS_HPP
 # define UTILS_HPP
 
-#include <array>
-#include <math.h> 
-#include <vector>
+# define GLFW_INCLUDE_VULKAN
+# include <GLFW/glfw3.h>
+
+# include <array>
+# include <math.h> 
+# include <vector>
+# include <unordered_map>
+# include <chrono>
+# include <fstream>
+# include <iostream>
+# include <stdexcept>
+# include <cstdlib>
+# include <vector>
+# include <cstring>
+# include <cstdint>
+# include <limits>
+# include <algorithm>
+# include <optional>
+# include <array>
+# include <set>
 
 struct vert {
 	float x;
@@ -23,6 +40,73 @@ struct face {
 struct attributes {
 	std::vector<vert> vertices;
 	std::vector<face> faces;
+};
+
+struct vector4
+{
+	float x;
+	float y;
+	float z;
+	float w;
+
+	bool operator==(const vector4& other) const {
+		return x == other.x && y == other.y && z == other.z && w == other.w;
+	}
+
+	static vector4 create(float x, float y, float z, float w){
+		vector4 ret;
+
+		ret.x = x;
+		ret.y = y;
+		ret.z = z;
+		ret.w = w;
+
+		return (ret);
+	}
+
+	float& operator[](std::size_t idx) { 
+		if (idx == 0)
+			return x; 
+		if (idx == 1)
+			return y;
+		if (idx == 2)
+			return z; 
+		if (idx == 3)
+			return w;
+		else
+			return w; 
+	}
+
+	vector4 operator*(const vector4& rhs)
+	{
+		vector4 ret;
+		ret.x = rhs.x * x;
+		ret.y = rhs.y * y;
+		ret.z = rhs.z * z;
+		ret.w = rhs.w * w;
+		return (ret);
+	}
+
+	vector4 operator*(const float& rhs)
+	{
+		vector4 ret;
+		ret.x = rhs * x;
+		ret.y = rhs * y;
+		ret.z = rhs * z;
+		ret.w = rhs * w;
+		return (ret);
+	}
+
+
+	vector4 operator+(const vector4& rhs)
+	{
+		vector4 ret;
+		ret.x = rhs.x + x;
+		ret.y = rhs.y + y;
+		ret.z = rhs.z + z;
+		ret.w = rhs.w + w;
+		return (ret);
+	}
 };
 
 
@@ -45,6 +129,36 @@ struct vector3
 
 		return (ret);
 	}
+
+	vector3 operator*(const float& rhs)
+	{
+		vector3 ret;
+		ret.x = rhs * x;
+		ret.y = rhs * y;
+		ret.z = rhs * z;
+		return (ret);
+	}
+
+	vector3 operator-(const vector3& rhs)
+	{
+		vector3 ret;
+		ret.x = x - rhs.x;
+		ret.y = y - rhs.y;
+		ret.z = z - rhs.z;
+		return (ret);
+	}
+
+	float& operator[](std::size_t idx) { 
+		if (idx == 0)
+			return x; 
+		if (idx == 1)
+			return y;
+		if (idx == 2)
+			return z;
+		else
+			return z; 
+	}
+	
 };
 
 struct vector2
@@ -57,57 +171,67 @@ struct vector2
 	}
 };
 
+struct mat4
+{
+	vector4 mat[4];
+
+	static mat4 create(float value){
+		mat4 ret;
+
+		for (int i = 0; i < 4; i++)
+		{
+			for (int x = 0; x < 4; x ++)
+			{
+				if (i == x)
+					ret.mat[i][x] = value;
+				else
+					ret.mat[i][x] = 0.0f;
+			}
+		}
+		return (ret);
+	}
+
+	vector4& operator[](std::size_t idx) { return mat[idx]; }
+
+	bool operator==(const mat4& other) const {
+		return mat == other.mat;
+	}
+
+	static mat4 rotate(mat4 mat, float angle, vector3 axis){
+		mat4 ret;
+		mat4 rotate;
+
+
+		float cos = std::cos(angle);
+		float sin = std::sin(angle);
+
+		vector3 temp(axis * (1.0f - cos));
+
+		rotate[0][0] = cos + temp[0] * axis[0];
+		rotate[0][1] = temp[0] * axis[1] + sin * axis[2];
+		rotate[0][2] = temp[0] * axis[2] - sin * axis[1];
+
+		rotate[1][0] = temp[1] * axis[0] - sin * axis[2];
+		rotate[1][1] = cos + temp[1] * axis[1];
+		rotate[1][2] = temp[1] * axis[2] + sin * axis[0];
+
+		rotate[2][0] = temp[2] * axis[0] + sin * axis[1];
+		rotate[2][1] = temp[2] * axis[1] - sin * axis[0];
+		rotate[2][2] = cos + temp[2] * axis[2];
+
+
+		ret[0] = mat[0] * rotate[0][0] + mat[1] * rotate[0][1] + mat[2] * rotate[0][2];
+		ret[1] = mat[0] * rotate[1][0] + mat[1] * rotate[1][1] + mat[2] * rotate[1][2];
+		ret[2] = mat[0] * rotate[2][0] + mat[1] * rotate[2][1] + mat[2] * rotate[2][2];
+		ret[3] = mat[3];
+
+		return (ret);
+	}
+};
+
 void Load_obj(attributes *att, const char *filename);
-
-// struct mat4
-// {
-// 	float mat[16];
-
-// 	static mat4 create(float value){
-// 		mat4 ret;
-
-// 		for (int i = 0; i < 4; i++)
-// 		{
-// 			for (int x = 0; x < 4; x ++)
-// 			{
-// 				ret.mat[i * 4 + x] = value;
-// 			}
-// 		}
-// 		return (ret);
-// 	}
-
-// 	bool operator==(const mat4& other) const {
-// 		return mat == other.mat;
-// 	}
-
-// 	static mat4 rotate(mat4 mat, float angle, vector3 axis){
-// 		mat4 ret;
-
-// 		float cos = std::cos(angle);
-// 		float sin = std::sin(angle);
-
-// 		ret.mat[0] = mat.mat[0];
-// 		ret.mat[1] = mat.mat[1];
-// 		ret.mat[2] = mat.mat[2];
-// 		ret.mat[3] = mat.mat[3];
-
-// 		ret.mat[4] = mat.mat[4];
-// 		ret.mat[5] = mat.mat[5];
-// 		ret.mat[6] = mat.mat[6];
-// 		ret.mat[7] = mat.mat[7];
-
-// 		ret.mat[8] = mat.mat[8];
-// 		ret.mat[9] = mat.mat[9];
-// 		ret.mat[10] = mat.mat[10];
-// 		ret.mat[11] = mat.mat[11];
-
-// 		ret.mat[12] = mat.mat[12];
-// 		ret.mat[13] = mat.mat[13];
-// 		ret.mat[14] = mat.mat[14];
-// 		ret.mat[15] = mat.mat[15];
-
-// 		return (ret);
-// 	}
-// };
+mat4 lookat(vector3 eye, vector3 center, vector3 up);
+mat4 perspective(float fov, float aspect, float near, float far);
+void keyboard_input(GLFWwindow  *window, vector3 *position);
 
 #endif

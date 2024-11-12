@@ -1,29 +1,7 @@
-#define GLFW_INCLUDE_VULKAN
-#include <GLFW/glfw3.h>
-#define GLM_FORCE_RADIANS
-#define GLM_FORCE_DEFAULT_ALIGNED_GENTYPES
-#define GLM_FORCE_DEPTH_ZERO_TO_ONE
-#include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
-#define STB_IMAGE_IMPLEMENTATION
-#include "stb_image.h"
-
 #include "utils.hpp"
 
-#include <unordered_map>
-#include <chrono>
-#include <fstream>
-#include <iostream>
-#include <stdexcept>
-#include <cstdlib>
-#include <vector>
-#include <cstring>
-#include <cstdint>
-#include <limits>
-#include <algorithm>
-#include <optional>
-#include <array>
-#include <set>
+#define STB_IMAGE_IMPLEMENTATION
+#include "stb_image.h"
 
 const int MAX_FRAMES_IN_FLIGHT = 2;
 const uint32_t WIDTH = 800;
@@ -127,29 +105,10 @@ namespace std {
 }
 
 struct UniformBufferObject {
-    alignas(16) glm::mat4 model;
-    alignas(16) glm::mat4 view;
-    alignas(16) glm::mat4 proj;
+    alignas(16) mat4 model;
+    alignas(16) mat4 view;
+    alignas(16) mat4 proj;
 };
-
-
-
-// const std::vector<Vertex> vertices = {
-//     {{-0.5f, -0.5f, 0.0f}, {1.0f, 0.0f, 0.0f}, {0.0f, 0.0f}},
-//     {{0.5f, -0.5f, 0.0f}, {0.0f, 1.0f, 0.0f}, {1.0f, 0.0f}},
-//     {{0.5f, 0.5f, 0.0f}, {0.0f, 0.0f, 1.0f}, {1.0f, 1.0f}},
-//     {{-0.5f, 0.5f, 0.0f}, {1.0f, 1.0f, 1.0f}, {0.0f, 1.0f}},
-
-//     {{-0.5f, -0.5f, -0.5f}, {1.0f, 0.0f, 0.0f}, {0.0f, 0.0f}},
-//     {{0.5f, -0.5f, -0.5f}, {0.0f, 1.0f, 0.0f}, {1.0f, 0.0f}},
-//     {{0.5f, 0.5f, -0.5f}, {0.0f, 0.0f, 1.0f}, {1.0f, 1.0f}},
-//     {{-0.5f, 0.5f, -0.5f}, {1.0f, 1.0f, 1.0f}, {0.0f, 1.0f}}
-// };
-
-// const std::vector<uint16_t> indices = {
-//     0, 1, 2, 2, 3, 0,
-//     4, 5, 6, 6, 7, 4
-// };
 
 struct QueueFamilyIndices {
     std::optional<uint32_t> graphicsFamily;
@@ -227,6 +186,8 @@ private:
 	bool framebufferResized = false;
 	uint32_t currentFrame = 0;
 
+	vector3 pos = vector3::create(0.f,0.f,0.f);
+
 	VkDescriptorPool descriptorPool;
 	std::vector<VkDescriptorSet> descriptorSets;
 
@@ -284,7 +245,7 @@ private:
 				verte.z
 			};
 
-			vertex.color = {0.1f, 1.0f, 1.0f};
+			vertex.color = {0.5f, 1.0f, 1.0f};
 
 			if (uniqueVertices.count(vertex) == 0) {
 				uniqueVertices[vertex] = static_cast<uint32_t>(vertices.size());
@@ -820,13 +781,15 @@ private:
 		auto currentTime = std::chrono::high_resolution_clock::now();
 		float time = std::chrono::duration<float, std::chrono::seconds::period>(currentTime - startTime).count();
 
+
 		UniformBufferObject ubo{};
-		//ubo.model = glm::mat4(1.0f); 
-		ubo.model = glm::mat4(1.0f);
-		ubo.model = glm::rotate(glm::mat4(1.0f), time * degToRadians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-		//ubo.model = glm::rotate(ubo.model, glm::radians(90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
-		ubo.view = glm::lookAt(glm::vec3(5.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-		ubo.proj = glm::perspective(degToRadians(90.0f), swapChainExtent.width / (float) swapChainExtent.height, 0.1f, 10.0f);
+		ubo.model = mat4::create(1.0f);
+		ubo.model[3][0] = pos.x;
+		ubo.model[3][1] = pos.y;
+		ubo.model[3][2] = pos.z;
+		ubo.model = mat4::rotate(ubo.model, time * degToRadians(90.0f), vector3::create(0.0f, 1.0f, 0.0f));
+		ubo.view = lookat(vector3::create(5.0f, 0.0f, 0.0f), vector3::create(0.0f, 0.0f, 0.0f), vector3::create(0.0f, 1.0f, 0.0f));
+		ubo.proj = perspective(degToRadians(90.0f), swapChainExtent.width / (float) swapChainExtent.height, 0.1f, 20.0f);
 		ubo.proj[1][1] *= -1;
 
 		memcpy(uniformBuffersMapped[currentImage], &ubo, sizeof(ubo));
@@ -1455,6 +1418,8 @@ private:
 
 	void drawFrame() {
 		vkWaitForFences(device, 1, &inFlightFences[currentFrame], VK_TRUE, UINT64_MAX);
+
+		keyboard_input(window, &pos);
 
 		updateUniformBuffer(currentFrame);
 
