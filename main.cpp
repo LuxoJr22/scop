@@ -7,7 +7,7 @@ const int MAX_FRAMES_IN_FLIGHT = 2;
 const uint32_t WIDTH = 800;
 const uint32_t HEIGHT = 600;
 
-const std::string MODEL_PATH = "assets/42.obj";
+const std::string MODEL_PATH = "assets/teapot.obj";
 const std::string TEXTURE_PATH = "textures/texture.jpg";
 
 const std::vector<const char*> validationLayers = {
@@ -243,6 +243,11 @@ private:
 				verte.x,
 				verte.y,
 				verte.z
+			};
+
+			vertex.texCoord = {
+				0.5,
+				0.5
 			};
 
 			vertex.color = {0.5f, 1.0f, 1.0f};
