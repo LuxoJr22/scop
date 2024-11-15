@@ -7,8 +7,8 @@ const int MAX_FRAMES_IN_FLIGHT = 2;
 const uint32_t WIDTH = 800;
 const uint32_t HEIGHT = 600;
 
-const std::string MODEL_PATH = "assets/teapot.obj";
-const std::string TEXTURE_PATH = "textures/texture.jpg";
+const std::string MODEL_PATH = "assets/42.obj";
+const std::string TEXTURE_PATH = "textures/viking_room.png";
 
 const std::vector<const char*> validationLayers = {
     "VK_LAYER_KHRONOS_validation"
@@ -234,6 +234,7 @@ private:
 
 	void fill_indices(const float tris[3], attributes att)
 	{
+		float color = float((rand() % 50)) / 100.0f;
 		for (int i = 0; i < 3; i ++)
 		{
 			Vertex vertex{};
@@ -246,8 +247,8 @@ private:
 			};
 
 			vertex.texCoord = {
-				0.5,
-				0.5
+				color,
+				float((rand() % 50)) / 100.0f
 			};
 
 			vertex.color = {0.5f, 1.0f, 1.0f};
@@ -265,6 +266,10 @@ private:
 		attributes att;
 
 		Load_obj(&att, MODEL_PATH.c_str());
+
+		//att.vertices[0].x += 1;
+		center_obj(&att);
+
 
 		for (const auto& faces : att.faces) {
 			fill_indices(faces.tris[0], att);

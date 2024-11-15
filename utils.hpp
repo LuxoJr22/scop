@@ -18,6 +18,7 @@
 # include <cstdint>
 # include <limits>
 # include <algorithm>
+# include <random>
 # include <optional>
 # include <array>
 # include <set>
@@ -233,5 +234,6 @@ void Load_obj(attributes *att, const char *filename);
 mat4 lookat(vector3 eye, vector3 center, vector3 up);
 mat4 perspective(float fov, float aspect, float near, float far);
 void keyboard_input(GLFWwindow  *window, vector3 *position);
+void center_obj(attributes *att);
 
 #endif

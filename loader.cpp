@@ -53,6 +53,35 @@ void make_triangles(face *face, attributes *att)
 	}
 }
 
+void center_obj(attributes *att)
+{
+	float max_x = att->vertices[0].x;
+	float min_x = att->vertices[0].x;
+	float max_y = att->vertices[0].y;
+	float min_y = att->vertices[0].y;
+	float max_z = att->vertices[0].z;
+	float min_z = att->vertices[0].z;
+
+	for (const auto& vert : att->vertices) {
+		if (vert.x > max_x) max_x = vert.x;
+		if (vert.x < min_x) min_x = vert.x;
+		if (vert.y > max_y) max_y = vert.y;
+		if (vert.y < min_y) min_y = vert.y;
+		if (vert.z > max_z) max_z = vert.z;
+		if (vert.z < min_z) min_z = vert.z;
+	}
+	
+	float off_x = (max_x + min_x) / 2;
+	float off_y = (max_y + min_y) / 2;
+	float off_z = (max_z + min_z) / 2;
+
+	for (int i = 0; i < att->vertices.size(); i++) {
+		att->vertices[i].x -= off_x;
+		att->vertices[i].y -= off_y;
+		att->vertices[i].z -= off_z;
+	}
+}
+
 void Load_obj(attributes *att, const char *filename)
 {
 	std::ifstream file;
