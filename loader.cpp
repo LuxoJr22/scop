@@ -55,30 +55,30 @@ void make_triangles(face *face, attributes *att)
 
 void center_obj(attributes *att)
 {
-	float max_x = att->vertices[0].x;
-	float min_x = att->vertices[0].x;
-	float max_y = att->vertices[0].y;
-	float min_y = att->vertices[0].y;
-	float max_z = att->vertices[0].z;
-	float min_z = att->vertices[0].z;
+	att->lim_x.max = att->vertices[0].x;
+	att->lim_x.min = att->vertices[0].x;
+	att->lim_y.max = att->vertices[0].y;
+	att->lim_y.min = att->vertices[0].y;
+	att->lim_z.max = att->vertices[0].z;
+	att->lim_z.min = att->vertices[0].z;
 
 	for (const auto& vert : att->vertices) {
-		if (vert.x > max_x) max_x = vert.x;
-		if (vert.x < min_x) min_x = vert.x;
-		if (vert.y > max_y) max_y = vert.y;
-		if (vert.y < min_y) min_y = vert.y;
-		if (vert.z > max_z) max_z = vert.z;
-		if (vert.z < min_z) min_z = vert.z;
+		if (vert.x > att->lim_x.max) att->lim_x.max = vert.x;
+		if (vert.x < att->lim_x.min) att->lim_x.min = vert.x;
+		if (vert.y > att->lim_y.max) att->lim_y.max = vert.y;
+		if (vert.y < att->lim_y.min) att->lim_y.min = vert.y;
+		if (vert.z > att->lim_z.max) att->lim_z.max = vert.z;
+		if (vert.z < att->lim_z.min) att->lim_z.min = vert.z;
 	}
 	
-	float off_x = (max_x + min_x) / 2;
-	float off_y = (max_y + min_y) / 2;
-	float off_z = (max_z + min_z) / 2;
+	att->off_x = (att->lim_x.max + att->lim_x.min) / 2;
+	att->off_y = (att->lim_y.max + att->lim_y.min) / 2;
+	att->off_z = (att->lim_z.max + att->lim_z.min) / 2;
 
 	for (int i = 0; i < att->vertices.size(); i++) {
-		att->vertices[i].x -= off_x;
-		att->vertices[i].y -= off_y;
-		att->vertices[i].z -= off_z;
+		att->vertices[i].x -= att->off_x;
+		att->vertices[i].y -= att->off_y;
+		att->vertices[i].z -= att->off_z;
 	}
 }
 

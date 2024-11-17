@@ -187,6 +187,7 @@ private:
 	uint32_t currentFrame = 0;
 
 	vector3 pos = vector3::create(0.f,0.f,0.f);
+	controls cont = controls::init();
 
 	VkDescriptorPool descriptorPool;
 	std::vector<VkDescriptorSet> descriptorSets;
@@ -234,7 +235,11 @@ private:
 
 	void fill_indices(const float tris[3], attributes att)
 	{
+		float width = att.lim_x.max - att.lim_y.min;
+		float height = att.lim_y.max - att.lim_y.min;
+		float thickness = att.lim_z.max - att.lim_z.min;
 		float color = float((rand() % 50)) / 100.0f;
+
 		for (int i = 0; i < 3; i ++)
 		{
 			Vertex vertex{};
@@ -246,12 +251,15 @@ private:
 				verte.z
 			};
 
-			vertex.texCoord = {
-				color,
-				float((rand() % 50)) / 100.0f
-			};
+			float x_coord = 1 - (verte.x + (width / 2)) / (width);
+			float y_coord = 1 - (verte.y + (height / 2)) / (height);
+			float z_coord = 1 - (verte.z + (thickness / 2)) / (thickness);
 
-			vertex.color = {0.5f, 1.0f, 1.0f};
+			vertex.texCoord = {
+				z_coord,
+				y_coord
+			};
+			vertex.color = {color, .0f, .0f};
 
 			if (uniqueVertices.count(vertex) == 0) {
 				uniqueVertices[vertex] = static_cast<uint32_t>(vertices.size());
@@ -1429,8 +1437,9 @@ private:
 	void drawFrame() {
 		vkWaitForFences(device, 1, &inFlightFences[currentFrame], VK_TRUE, UINT64_MAX);
 
-		keyboard_input(window, &pos);
+		keyboard_input(window, &pos, &cont);
 
+		//std::cout << cont.text << std::endl;
 		updateUniformBuffer(currentFrame);
 
 

@@ -1,6 +1,6 @@
 #include "utils.hpp"
 
-void keyboard_input(GLFWwindow  *window, vector3 *position)
+void keyboard_input(GLFWwindow  *window, vector3 *position, controls *inputs)
 {
 	if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
 		position->x -= 0.1;
@@ -14,5 +14,8 @@ void keyboard_input(GLFWwindow  *window, vector3 *position)
 		position->y -= 0.1;
 	if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS)
 		position->y += 0.1;
+
+	if (glfwGetKey(window, GLFW_KEY_C) == GLFW_PRESS)
+		inputs->text *= -1;
 	
 }

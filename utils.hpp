@@ -38,9 +38,35 @@ struct face {
 
 };
 
+struct limit {
+	float max;
+	float min;
+};
+
+struct controls {
+	float text;
+
+	static controls init()
+	{
+		controls ret;
+
+		ret.text = 1;
+
+		return ret;
+	}
+};
+
 struct attributes {
 	std::vector<vert> vertices;
 	std::vector<face> faces;
+
+	limit lim_x;
+	limit lim_y;
+	limit lim_z;
+
+	float off_x;
+	float off_y;
+	float off_z;
 };
 
 struct vector4
@@ -233,7 +259,7 @@ struct mat4
 void Load_obj(attributes *att, const char *filename);
 mat4 lookat(vector3 eye, vector3 center, vector3 up);
 mat4 perspective(float fov, float aspect, float near, float far);
-void keyboard_input(GLFWwindow  *window, vector3 *position);
+void keyboard_input(GLFWwindow  *window, vector3 *position, controls *inputs);
 void center_obj(attributes *att);
 
 #endif
