@@ -43,19 +43,6 @@ struct limit {
 	float min;
 };
 
-struct controls {
-	float text;
-
-	static controls init()
-	{
-		controls ret;
-
-		ret.text = 1;
-
-		return ret;
-	}
-};
-
 struct attributes {
 	std::vector<vert> vertices;
 	std::vector<face> faces;
@@ -259,7 +246,7 @@ struct mat4
 void Load_obj(attributes *att, const char *filename);
 mat4 lookat(vector3 eye, vector3 center, vector3 up);
 mat4 perspective(float fov, float aspect, float near, float far);
-void keyboard_input(GLFWwindow  *window, vector3 *position, controls *inputs);
+void keyboard_input(GLFWwindow  *window, vector3 *position);
 void center_obj(attributes *att);
 
 #endif

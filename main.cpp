@@ -7,7 +7,7 @@ const int MAX_FRAMES_IN_FLIGHT = 2;
 const uint32_t WIDTH = 800;
 const uint32_t HEIGHT = 600;
 
-const std::string MODEL_PATH = "assets/42.obj";
+const std::string MODEL_PATH = "assets/teapot.obj";
 const std::string TEXTURE_PATH = "textures/viking_room.png";
 
 const std::vector<const char*> validationLayers = {
@@ -37,6 +37,8 @@ static std::vector<char> readFile(const std::string& filename) {
 float degToRadians(float angle) {
 	return (angle * (3.14159265 / 180));
 }
+
+float trans_text = 1;
 
 struct Vertex {
     vector3 pos;
@@ -108,6 +110,7 @@ struct UniformBufferObject {
     alignas(16) mat4 model;
     alignas(16) mat4 view;
     alignas(16) mat4 proj;
+	alignas(4) float transition;
 };
 
 struct QueueFamilyIndices {
@@ -131,6 +134,12 @@ struct SwapChainSupportDetails {
 #else
     const bool enableValidationLayers = true;
 #endif
+
+void keyboard_callback(GLFWwindow *window, int key, int scancode, int action, int mods)
+{
+	if (key == GLFW_KEY_C && action == GLFW_PRESS)
+		trans_text *= -1;
+}
 
 class HelloTriangleApplication {
 public:
@@ -187,7 +196,7 @@ private:
 	uint32_t currentFrame = 0;
 
 	vector3 pos = vector3::create(0.f,0.f,0.f);
-	controls cont = controls::init();
+	float text_state = 1;
 
 	VkDescriptorPool descriptorPool;
 	std::vector<VkDescriptorSet> descriptorSets;
@@ -206,6 +215,7 @@ private:
 		window = glfwCreateWindow(WIDTH, HEIGHT, "Vulkan", nullptr, nullptr);
 		glfwSetWindowUserPointer(window, this);
 		glfwSetFramebufferSizeCallback(window, framebufferResizeCallback);
+		glfwSetKeyCallback(window, keyboard_callback);
 	}
     void initVulkan() {
 		createInstance();
@@ -809,6 +819,13 @@ private:
 		ubo.view = lookat(vector3::create(5.0f, 0.0f, 0.0f), vector3::create(0.0f, 0.0f, 0.0f), vector3::create(0.0f, 1.0f, 0.0f));
 		ubo.proj = perspective(degToRadians(90.0f), swapChainExtent.width / (float) swapChainExtent.height, 0.1f, 20.0f);
 		ubo.proj[1][1] *= -1;
+		if ((text_state < 1 && trans_text == 1) || (text_state > 0 && trans_text == -1))
+			text_state += ((time - std::floor(time)) / 100) * trans_text;
+	
+		if (text_state > 1) text_state = 1;
+		if (text_state < 0) text_state = 0;
+
+		ubo.transition = text_state;
 
 		memcpy(uniformBuffersMapped[currentImage], &ubo, sizeof(ubo));
 	}
@@ -1437,9 +1454,8 @@ private:
 	void drawFrame() {
 		vkWaitForFences(device, 1, &inFlightFences[currentFrame], VK_TRUE, UINT64_MAX);
 
-		keyboard_input(window, &pos, &cont);
+		keyboard_input(window, &pos);
 
-		//std::cout << cont.text << std::endl;
 		updateUniformBuffer(currentFrame);
 
 
