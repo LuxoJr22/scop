@@ -4,7 +4,6 @@
 
 std::array<float, 4> splitted_line(std::string line)
 {
-	std::string *lines;
 	std::string	act_line;
 	std::array<float, 4> number;
 	int i = 0;

@@ -1,8 +1,5 @@
 #include "utils.hpp"
 
-#define STB_IMAGE_IMPLEMENTATION
-#include "stb_image.h"
-
 const int MAX_FRAMES_IN_FLIGHT = 2;
 const uint32_t WIDTH = 800;
 const uint32_t HEIGHT = 600;
@@ -498,7 +495,8 @@ private:
 
 	void createTextureImage() {
 		int texWidth, texHeight, texChannels;
-		stbi_uc* pixels = stbi_load(TEXTURE_PATH.c_str(), &texWidth, &texHeight, &texChannels, STBI_rgb_alpha);
+
+		unsigned char* pixels = load_img("textures/viking_room.xpm", &texWidth, &texHeight);
 		VkDeviceSize imageSize = texWidth * texHeight * 4;
 
 		if (!pixels) {
@@ -514,7 +512,7 @@ private:
 		memcpy(data, pixels, static_cast<size_t>(imageSize));
 		vkUnmapMemory(device, stagingBufferMemory);
 
-		stbi_image_free(pixels);
+		free(pixels);
 
 		createImage(texWidth, texHeight, VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, textureImage, textureImageMemory);
 	
@@ -526,6 +524,7 @@ private:
 
 		vkDestroyBuffer(device, stagingBuffer, nullptr);
 		vkFreeMemory(device, stagingBufferMemory, nullptr);
+		std::cout << "non" << std::endl;
 	}
 
 	void createDescriptorPool() {

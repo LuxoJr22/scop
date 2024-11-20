@@ -21,6 +21,7 @@
 # include <random>
 # include <optional>
 # include <array>
+# include <map>
 # include <set>
 
 struct vert {
@@ -67,6 +68,22 @@ struct attributes {
 	float off_x;
 	float off_y;
 	float off_z;
+};
+
+struct colors {
+	int r;
+	int g;
+	int b;
+	int a;
+};
+
+struct img_load {
+	int height;
+	int width;
+	int nb_char;
+	int len_char;
+	std::map<std::string, colors> chars;
+	unsigned char *pixels;
 };
 
 struct vector4
@@ -260,6 +277,8 @@ void Load_obj(attributes *att, const char *filename);
 mat4 lookat(vector3 eye, vector3 center, vector3 up);
 mat4 perspective(float fov, float aspect, float near, float far);
 void keyboard_input(GLFWwindow  *window, vector3 *position, controls *inputs);
+std::array<float, 4> splitted_line(std::string line);
+unsigned char *load_img(const char *str, int *width, int *height);
 void center_obj(attributes *att);
 
 #endif
