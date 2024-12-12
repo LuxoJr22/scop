@@ -4,11 +4,11 @@ const int MAX_FRAMES_IN_FLIGHT = 2;
 const uint32_t WIDTH = 800;
 const uint32_t HEIGHT = 600;
 
-const std::string MODEL_PATH = "assets/42.obj";
+const std::string MODEL_PATH = "assets/teapot.obj";
 const std::string TEXTURE_PATH = "textures/viking_room.png";
 
 const std::vector<const char*> validationLayers = {
-    "VK_LAYER_KHRONOS_validation"
+
 };
 
 const std::vector<const char*> deviceExtensions = {
@@ -818,7 +818,7 @@ private:
 		ubo.proj = perspective(degToRadians(90.0f), swapChainExtent.width / (float) swapChainExtent.height, 0.1f, 20.0f);
 		ubo.proj[1][1] *= -1;
 		if ((text_state < 1 && trans_text == 1) || (text_state > 0 && trans_text == -1))
-			text_state += ((time - std::floor(time)) / 100) * trans_text;
+			text_state += ((time - std::floor(time)) / 1000) * trans_text;
 
 		if (text_state > 1) text_state = 1;
 		if (text_state < 0) text_state = 0;
@@ -1304,7 +1304,6 @@ private:
 		for (const auto& device : devices) {
 			if (isDeviceSuitable(device)) {
 				physicalDevice = device;
-				break;
 			}
 		}
 
@@ -1597,7 +1596,7 @@ private:
 		vkEnumerateInstanceLayerProperties(&layerCount, nullptr);
 
 		std::vector<VkLayerProperties> availableLayers(layerCount);
-		vkEnumerateInstanceLayerProperties(&layerCount, availableLayers.data());
+		vkEnumerateInstanceLayerProperties(&layerCount, availableLayers.data());	
 
     	for (const char* layerName : validationLayers) {
 			bool layerFound = false;
