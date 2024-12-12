@@ -66,7 +66,67 @@ class Vulkan_App {
         std::vector<Vertex> vertices;
         std::unordered_map<Vertex, uint32_t> uniqueVertices{};
         std::vector<uint32_t> indices;
-}
+
+        VkSurfaceFormatKHR chooseSwapSurfaceFormat(const std::vector<VkSurfaceFormatKHR>& availableFormats);
+        bool checkValidationLayerSupport();
+        VkPresentModeKHR chooseSwapPresentMode(const std::vector<VkPresentModeKHR>& availablePresentModes);
+        VkExtent2D chooseSwapExtent(const VkSurfaceCapabilitiesKHR& capabilities);
+        void fill_indices(const float tris[3], attributes att);
+        void createImage(uint32_t width, uint32_t height, VkFormat format, VkImageTiling tiling, VkImageUsageFlags usage, VkMemoryPropertyFlags properties, VkImage& image, VkDeviceMemory& imageMemory);
+        void loadModel();
+        void cleanup();
+        void initWindow();
+        void initVulkan();
+        void createDepthResources();
+        bool hasStencilComponent(VkFormat format);
+        VkFormat findDepthFormat();
+        VkFormat findSupportedFormat(const std::vector<VkFormat>& candidates, VkImageTiling tiling, VkFormatFeatureFlags features);
+        void createTextureSampler();
+        VkImageView createImageView(VkImage image, VkFormat format, VkImageAspectFlags aspectFlags);
+        void createTextureImageView();
+        void copyBufferToImage(VkBuffer buffer, VkImage image, uint32_t width, uint32_t height);
+        void transitionImageLayout(VkImage image, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout);
+        void createTextureImage();
+        void createDescriptorPool();
+        VkCommandBuffer beginSingleTimeCommands();
+        void endSingleTimeCommands(VkCommandBuffer commandBuffer);
+        void createDescriptorSets();
+        void createUniformBuffers();
+        void createDescriptorSetLayout();
+        uint32_t findMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties);
+        void createBuffer(VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties, VkBuffer& buffer, VkDeviceMemory& bufferMemory);
+        void createIndexBuffer();
+        void createVertexBuffer();
+        void copyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size);
+        void cleanupSwapChain();
+        void recreateSwapChain();
+        void updateUniformBuffer(uint32_t currentImage);
+        void createSyncObjects();
+        void recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t imageIndex);
+        void createCommandBuffers();
+        void createCommandPool();
+        void createFramebuffers();
+        void createRenderPass();
+        VkShaderModule createShaderModule(const std::vector<char>& code);
+        void createGraphicsPipeline();
+        void createImageViews();
+        void createSwapChain();
+        void createSurface();
+        void createLogicalDevice();
+        void pickPhysicalDevice();
+        bool isDeviceSuitable(VkPhysicalDevice device);
+        bool checkDeviceExtensionSupport(VkPhysicalDevice device);
+        SwapChainSupportDetails querySwapChainSupport(VkPhysicalDevice device);
+        QueueFamilyIndices findQueueFamilies(VkPhysicalDevice device);
+        void createInstance();
+        void mainLoop();
+        void drawFrame();
+
+        static void framebufferResizeCallback(GLFWwindow* window, int width, int height) {
+            auto app = reinterpret_cast<HelloTriangleApplication*>(glfwGetWindowUserPointer(window));
+            app->framebufferResized = true;
+        }
+};
 
 
 
