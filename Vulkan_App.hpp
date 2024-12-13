@@ -1,16 +1,138 @@
 #ifndef VULKAN_APP_HPP
 # define VULKAN_APP_HPP
 
-#include "utils.hpp"
+# include "utils.hpp"
+
+const int MAX_FRAMES_IN_FLIGHT = 2;
+const uint32_t WIDTH = 800;
+const uint32_t HEIGHT = 600;
+
+const std::string MODEL_PATH = "assets/teapot.obj";
+const std::string TEXTURE_PATH = "textures/viking_room.png";
+
+const std::vector<const char*> validationLayers = {
+
+};
+
+const std::vector<const char*> deviceExtensions = {
+	VK_KHR_SWAPCHAIN_EXTENSION_NAME
+};
+
+static std::vector<char> readFile(const std::string& filename) {
+    std::ifstream file(filename, std::ios::ate | std::ios::binary);
+
+    if (!file.is_open()) {
+        throw std::runtime_error("failed to open file!");
+    }
+
+	size_t fileSize = (size_t) file.tellg();
+	std::vector<char> buffer(fileSize);
+	file.seekg(0);
+	file.read(buffer.data(), fileSize);
+	file.close();
+
+	return buffer;
+}
+
+static float trans_text = 1;
+
+#ifdef NDEBUG
+    const bool enableValidationLayers = false;
+#else
+    const bool enableValidationLayers = true;
+#endif
+
+struct Vertex {
+    vector3 pos;
+    vector3 color;
+    vector2 texCoord;
+
+    static VkVertexInputBindingDescription getBindingDescription() {
+        VkVertexInputBindingDescription bindingDescription{};
+        bindingDescription.binding = 0;
+        bindingDescription.stride = sizeof(Vertex);
+        bindingDescription.inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
+
+        return bindingDescription;
+    }
+
+    static std::array<VkVertexInputAttributeDescription, 3> getAttributeDescriptions() {
+        std::array<VkVertexInputAttributeDescription, 3> attributeDescriptions{};
+
+        attributeDescriptions[0].binding = 0;
+        attributeDescriptions[0].location = 0;
+        attributeDescriptions[0].format = VK_FORMAT_R32G32B32_SFLOAT;
+        attributeDescriptions[0].offset = offsetof(Vertex, pos);
+
+        attributeDescriptions[1].binding = 0;
+        attributeDescriptions[1].location = 1;
+        attributeDescriptions[1].format = VK_FORMAT_R32G32B32_SFLOAT;
+        attributeDescriptions[1].offset = offsetof(Vertex, color);
+
+        attributeDescriptions[2].binding = 0;
+        attributeDescriptions[2].location = 2;
+        attributeDescriptions[2].format = VK_FORMAT_R32G32_SFLOAT;
+        attributeDescriptions[2].offset = offsetof(Vertex, texCoord);
+
+        return attributeDescriptions;
+    }
+
+	bool operator==(const Vertex& other) const {
+		return pos == other.pos && color == other.color && texCoord == other.texCoord;
+	}
+
+};
+
+namespace std {
+	template<> struct hash<vector3> {
+        size_t operator()(vector3 const& pos) const {
+            return ((hash<float>()(pos.x) ^
+                   (hash<float>()(pos.y) << 1)) >> 1) ^
+                   (hash<float>()(pos.z) << 1);
+        }
+    };
+
+	template<> struct hash<vector2> {
+        size_t operator()(vector2 const& pos) const {
+            return (hash<float>()(pos.x)) ^
+                   (hash<float>()(pos.y) << 1);
+        }
+    };
+
+    template<> struct hash<Vertex> {
+        size_t operator()(Vertex const& vertex) const {
+            return ((hash<vector3>()(vertex.pos) ^
+                   (hash<vector3>()(vertex.color) << 1)) >> 1) ^
+                   (hash<vector2>()(vertex.texCoord) << 1);
+        }
+    };
+}
+
+struct UniformBufferObject {
+    alignas(16) mat4 model;
+    alignas(16) mat4 view;
+    alignas(16) mat4 proj;
+	alignas(4) float transition;
+};
+
+struct QueueFamilyIndices {
+    std::optional<uint32_t> graphicsFamily;
+	std::optional<uint32_t> presentFamily;
+
+    bool isComplete() {
+        return graphicsFamily.has_value() && presentFamily.has_value();
+    }
+};
+
+struct SwapChainSupportDetails {
+    VkSurfaceCapabilitiesKHR capabilities;
+    std::vector<VkSurfaceFormatKHR> formats;
+    std::vector<VkPresentModeKHR> presentModes;
+};
 
 class Vulkan_App {
     public:
-        void run() {
-            initWindow();
-            initVulkan();
-            mainLoop();
-            cleanup();
-        }
+        void run();
 
     private:
         GLFWwindow* window;
@@ -123,11 +245,14 @@ class Vulkan_App {
         void drawFrame();
 
         static void framebufferResizeCallback(GLFWwindow* window, int width, int height) {
-            auto app = reinterpret_cast<HelloTriangleApplication*>(glfwGetWindowUserPointer(window));
+            auto app = reinterpret_cast<Vulkan_App*>(glfwGetWindowUserPointer(window));
             app->framebufferResized = true;
         }
 };
 
+
+float degToRadians(float angle);
+void keyboard_callback(GLFWwindow *window, int key, int scancode, int action, int mods);
 
 
 #endif
