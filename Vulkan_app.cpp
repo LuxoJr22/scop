@@ -1,5 +1,7 @@
 #include "Vulkan_App.hpp"
 
+float trans_text = 1;
+
 void Vulkan_App::run() {
 	initWindow();
 	initVulkan();
@@ -366,6 +368,7 @@ void Vulkan_App::updateUniformBuffer(uint32_t currentImage) {
 	ubo.view = lookat(vector3::create(5.0f, 0.0f, 0.0f), vector3::create(0.0f, 0.0f, 0.0f), vector3::create(0.0f, 1.0f, 0.0f));
 	ubo.proj = perspective(degToRadians(90.0f), swapChainExtent.width / (float) swapChainExtent.height, 0.1f, 20.0f);
 	ubo.proj[1][1] *= -1;
+	
 	if ((text_state < 1 && trans_text == 1) || (text_state > 0 && trans_text == -1))
 		text_state += ((time - std::floor(time)) / 1000) * trans_text;
 
@@ -708,4 +711,10 @@ VkSurfaceFormatKHR Vulkan_App::chooseSwapSurfaceFormat(const std::vector<VkSurfa
 		}
 	}
 	return availableFormats[0];
+}
+
+void keyboard_callback(GLFWwindow *window, int key, int scancode, int action, int mods)
+{
+	if (key == GLFW_KEY_C && action == GLFW_PRESS)
+		trans_text *= -1;
 }

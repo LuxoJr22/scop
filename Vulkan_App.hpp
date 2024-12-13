@@ -34,7 +34,6 @@ static std::vector<char> readFile(const std::string& filename) {
 	return buffer;
 }
 
-static float trans_text = 1;
 
 #ifdef NDEBUG
     const bool enableValidationLayers = false;
