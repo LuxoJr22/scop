@@ -3,7 +3,7 @@
 void Vulkan_App::createTextureImage() {
 	int texWidth, texHeight, texChannels;
 
-	unsigned char* pixels = load_img("textures/viking_room.xpm", &texWidth, &texHeight);
+	unsigned char* pixels = load_img("textures/nain.xpm", &texWidth, &texHeight);
 	VkDeviceSize imageSize = texWidth * texHeight * 4;
 
 	if (!pixels) {
