@@ -504,12 +504,29 @@ void Vulkan_App::createSwapChain() {
 	swapChainExtent = extent;
 }
 
+double clockToMilliseconds(clock_t ticks){
+    // units/(units/time) => time (seconds) * 1000 = milliseconds
+    return (ticks/(double)CLOCKS_PER_SEC)*1000.0;
+}
+
 void Vulkan_App::mainLoop() {
+	clock_t deltaTime = 0;
+	unsigned int frames = 0;
+	double time = 0;
+
 	while (!glfwWindowShouldClose(window)) {
+		clock_t beginFrame = clock();
 		glfwPollEvents();
 		drawFrame();
+		clock_t endFrame = clock();
+
+		deltaTime = endFrame - beginFrame;
+		time += deltaTime;
+		frames ++;
+		std::cout << "\r";
+		std::cout << "Framerate: " << int(1 / (clockToMilliseconds(deltaTime) / 1000)) << "fps";
 	}
-	
+	std::cout << std::endl << "Average framerate: " << int(frames / (clockToMilliseconds(time) / 1000)) << "fps" << std::endl;
 	vkDeviceWaitIdle(device);
 }
 
