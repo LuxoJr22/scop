@@ -3,12 +3,16 @@
 void Vulkan_App::createTextureImage() {
 	int texWidth, texHeight, texChannels;
 
-	unsigned char* pixels = load_img("textures/nain.xpm", &texWidth, &texHeight);
+	unsigned char* pixels = load_img(TEXTURE_PATH.c_str(), &texWidth, &texHeight);
 	VkDeviceSize imageSize = texWidth * texHeight * 4;
 
 	if (!pixels) {
 		throw std::runtime_error("failed to load texture image!");
 	}
+	if (texWidth != texHeight) {
+		throw std::runtime_error("Image shoud be a square");
+	}
+	
 
 	VkBuffer stagingBuffer;
 	VkDeviceMemory stagingBufferMemory;

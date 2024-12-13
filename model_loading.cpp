@@ -22,6 +22,8 @@ void Vulkan_App::fill_indices(const float tris[3], attributes att)
 	float thickness = att.lim_z.max - att.lim_z.min;
 	float color = float((rand() % 50)) / 100.0f;
 
+	float totalw = (width * 2) + (thickness * 2);
+
 	for (int i = 0; i < 3; i ++)
 	{
 		Vertex vertex{};
@@ -37,10 +39,13 @@ void Vulkan_App::fill_indices(const float tris[3], attributes att)
 		float y_coord = 1 - (verte.y + (height / 2)) / (height);
 		float z_coord = 1 - (verte.z + (thickness / 2)) / (thickness);
 
+		float offw = totalw - (z_coord * thickness) - ((x_coord * width) + (z_coord * thickness));
+
 		vertex.texCoord = {
-			z_coord,
+			offw / totalw,
 			y_coord
 		};
+
 		vertex.color = {color, .0f, .0f};
 
 		if (uniqueVertices.count(vertex) == 0) {

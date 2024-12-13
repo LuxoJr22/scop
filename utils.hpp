@@ -180,6 +180,15 @@ struct vector3
 		return (ret);
 	}
 
+	vector3 operator+(const vector3& rhs)
+	{
+		vector3 ret;
+		ret.x = x + rhs.x;
+		ret.y = y + rhs.y;
+		ret.z = z + rhs.z;
+		return (ret);
+	}
+
 	float& operator[](std::size_t idx) { 
 		if (idx == 0)
 			return x; 
@@ -264,7 +273,7 @@ struct mat4
 void Load_obj(attributes *att, const char *filename);
 mat4 lookat(vector3 eye, vector3 center, vector3 up);
 mat4 perspective(float fov, float aspect, float near, float far);
-void keyboard_input(GLFWwindow  *window, vector3 *position);
+void keyboard_input(GLFWwindow  *window, vector3 *position, vector3 *c_pos);
 std::array<float, 4> splitted_line(std::string line);
 unsigned char *load_img(const char *str, int *width, int *height);
 void center_obj(attributes *att);

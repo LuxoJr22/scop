@@ -8,7 +8,7 @@ const uint32_t WIDTH = 800;
 const uint32_t HEIGHT = 600;
 
 const std::string MODEL_PATH = "assets/42.obj";
-const std::string TEXTURE_PATH = "textures/viking_room.png";
+const std::string TEXTURE_PATH = "textures/nain.xpm";
 
 const std::vector<const char*> validationLayers = {
 
@@ -179,6 +179,7 @@ class Vulkan_App {
         uint32_t currentFrame = 0;
 
         vector3 pos = vector3::create(0.f,0.f,0.f);
+        vector3 c_pos = vector3::create(5.f,0.f,0.f);
         float text_state = 1;
 
         VkDescriptorPool descriptorPool;

@@ -9,10 +9,6 @@ layout(location = 0) out vec4 outColor;
 
 void main() {
     vec4 face = vec4(fragColor.x, fragColor.x, fragColor.x, 1);
-    //outColor = vec4(fragColor.x, fragColor.x, fragColor.x, 1);
     vec4 text =  texture(texSampler, fragTexCoord);
-    //outColor = texture(texSampler, fragTexCoord);
-    //outColor = face;
-    //outColor2 = text;
     outColor = mix(face, text, transition);
 }

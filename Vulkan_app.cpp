@@ -1,6 +1,6 @@
 #include "Vulkan_App.hpp"
 
-float trans_text = 1;
+float trans_text = 0;
 
 void Vulkan_App::run() {
 	initWindow();
@@ -365,7 +365,7 @@ void Vulkan_App::updateUniformBuffer(uint32_t currentImage) {
 	ubo.model[3][1] = pos.y;
 	ubo.model[3][2] = pos.z;
 	ubo.model = mat4::rotate(ubo.model, time * degToRadians(90.0f), vector3::create(0.0f, 1.0f, 0.0f));
-	ubo.view = lookat(vector3::create(5.0f, 0.0f, 0.0f), vector3::create(0.0f, 0.0f, 0.0f), vector3::create(0.0f, 1.0f, 0.0f));
+	ubo.view = lookat(c_pos, vector3::create(0.f,0.f,0.f), vector3::create(0.0f, 1.0f, 0.0f));
 	ubo.proj = perspective(degToRadians(90.0f), swapChainExtent.width / (float) swapChainExtent.height, 0.1f, 20.0f);
 	ubo.proj[1][1] *= -1;
 	
@@ -533,7 +533,7 @@ void Vulkan_App::mainLoop() {
 void Vulkan_App::drawFrame() {
 	vkWaitForFences(device, 1, &inFlightFences[currentFrame], VK_TRUE, UINT64_MAX);
 
-	keyboard_input(window, &pos);
+	keyboard_input(window, &pos, &c_pos);
 	
 	updateUniformBuffer(currentFrame);
 

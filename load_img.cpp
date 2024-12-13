@@ -115,6 +115,8 @@ unsigned char *load_img(const char *str, int *width, int *height)
 
 	file.open(str);
 
+	if (!file.good())
+		return NULL;
 	
 
 	if (file.good())
