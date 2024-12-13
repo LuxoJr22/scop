@@ -5,10 +5,12 @@ SRCS = main.cpp loader.cpp utils.cpp key_input.cpp load_img.cpp Vulkan_app.cpp m
 VulkanTest: $(SRCS)
 	g++ $(CFLAGS) -o VulkanTest $(SRCS) $(LDFLAGS)
 
-.PHONY: test clean
+re: clean VulkanTest
 
 test: VulkanTest
 	./VulkanTest
 
 clean:
 	rm -f VulkanTest
+
+.PHONY: test clean
