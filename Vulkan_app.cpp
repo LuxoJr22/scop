@@ -1,6 +1,7 @@
 #include "Vulkan_App.hpp"
 
 float trans_text = -1;
+vector2 objs = vector2::create(-1.f, 1.f);
 
 void Vulkan_App::run() {
 	initWindow();
@@ -31,10 +32,10 @@ void Vulkan_App::initVulkan() {
 	createImageViews();
 	createRenderPass();
 	createDescriptorSetLayout(descriptorSetLayout);
-	//createDescriptorSetLayout(descriptorSetLayout2);
+	createDescriptorSetLayout(descriptorSetLayout2);
 
 	createGraphicsPipeline(graphicsPipeline, descriptorSetLayout, pipelineLayout);
-	//createGraphicsPipeline(graphicsPipeline2, descriptorSetLayout2, pipelineLayout2);
+	createGraphicsPipeline(graphicsPipeline2, descriptorSetLayout2, pipelineLayout2);
 
 	createCommandPool();
 	createDepthResources();
@@ -46,23 +47,23 @@ void Vulkan_App::initVulkan() {
 	
 
 	loadModel(MODEL_PATH.c_str(), vertices, uniqueVertices, indices);
-	//loadModel("assets/42.obj", vertices2, uniqueVertices2, indices2);
+	loadModel("assets/42.obj", vertices2, uniqueVertices2, indices2);
 
 	createVertexBuffer(vertices, vertexBuffer, vertexBufferMemory);
 	createIndexBuffer(indices, indexBuffer, indexBufferMemory);
 
-	//createVertexBuffer(vertices2, vertexBuffer2, vertexBufferMemory2);
-	//createIndexBuffer(indices2, indexBuffer2, indexBufferMemory2);
+	createVertexBuffer(vertices2, vertexBuffer2, vertexBufferMemory2);
+	createIndexBuffer(indices2, indexBuffer2, indexBufferMemory2);
 
 
 
 	createUniformBuffers(uniformBuffers, uniformBuffersMapped, uniformBuffersMemory);
-	//createUniformBuffers(uniformBuffers2, uniformBuffersMapped2, uniformBuffersMemory2);
+	createUniformBuffers(uniformBuffers2, uniformBuffersMapped2, uniformBuffersMemory2);
 
 	createDescriptorPool(descriptorPool);
-	//createDescriptorPool(descriptorPool2);
+	createDescriptorPool(descriptorPool2);
 	createDescriptorSets(descriptorSets, uniformBuffers, descriptorSetLayout, descriptorPool);
-	//createDescriptorSets(descriptorSets2, uniformBuffers2, descriptorSetLayout2, descriptorPool2);
+	createDescriptorSets(descriptorSets2, uniformBuffers2, descriptorSetLayout2, descriptorPool2);
 
 	createCommandBuffers();
 	createSyncObjects();
@@ -381,12 +382,11 @@ void Vulkan_App::updateUniformBuffer(uint32_t currentImage) {
 	float time = std::chrono::duration<float, std::chrono::seconds::period>(currentTime - startTime).count();
 
 	UniformBufferObject ubo{};
-	ubo.model = mat4::create(1.0f);
+	ubo.model = mat4::create(objs[0]);
 	ubo.model[3][0] = pos.x;
 	ubo.model[3][1] = pos.y;
 	ubo.model[3][2] = pos.z;
 	ubo.model = mat4::rotate(ubo.model, time * degToRadians(90.0f), vector3::create(0.0f, 1.0f, 0.0f));
-	//ubo.view = lookat(vector3::create( cos(c_pos.x) * 5 , c_pos.y, sin(c_pos.x) * 5 + c_pos.z), vector3::create(0.f,0.f,0.f), vector3::create(0.0f, 1.0f, 0.0f));
 	ubo.view = lookat(c_pos, vector3::create(0.f,0.f,0.f), vector3::create(0.0f, 1.0f, 0.0f));
 	ubo.proj = perspective(degToRadians(90.0f), swapChainExtent.width / (float) swapChainExtent.height, 0.1f, 20.0f);
 	ubo.proj[1][1] *= -1;
@@ -400,6 +400,23 @@ void Vulkan_App::updateUniformBuffer(uint32_t currentImage) {
 	ubo.transition = text_state;
 
 	memcpy(uniformBuffersMapped[currentImage], &ubo, sizeof(ubo));
+
+	UniformBufferObject ubo2{};
+	ubo2.model = mat4::create(objs[1]);
+	ubo2.model = mat4::rotate(ubo2.model, -time * degToRadians(90.0f), vector3::create(0.0f, 1.0f, 0.0f));
+	ubo2.view = lookat(c_pos, vector3::create(0.f,0.f,0.f), vector3::create(0.0f, 1.0f, 0.0f));
+	ubo2.proj = perspective(degToRadians(90.0f), swapChainExtent.width / (float) swapChainExtent.height, 0.1f, 20.0f);
+	ubo2.proj[1][1] *= -1;
+	
+	if ((text_state < 1 && trans_text == 1) || (text_state > 0 && trans_text == -1))
+		text_state += ((time - std::floor(time)) / 1000) * trans_text;
+
+	if (text_state > 1) text_state = 1;
+	if (text_state < 0) text_state = 0;
+
+	ubo2.transition = text_state;
+
+	memcpy(uniformBuffersMapped2[currentImage], &ubo2, sizeof(ubo2));
 }
 
 void Vulkan_App::createSyncObjects() {
@@ -527,7 +544,6 @@ void Vulkan_App::createSwapChain() {
 }
 
 double clockToMilliseconds(clock_t ticks){
-    // units/(units/time) => time (seconds) * 1000 = milliseconds
     return (ticks/(double)CLOCKS_PER_SEC)*1000.0;
 }
 
@@ -616,6 +632,7 @@ void Vulkan_App::cleanup() {
 	cleanupSwapChain();
 
 	vkDestroyDescriptorPool(device, descriptorPool, nullptr);
+	vkDestroyDescriptorPool(device, descriptorPool2, nullptr);
 
 	vkDestroySampler(device, textureSampler, nullptr);
 	vkDestroyImageView(device, textureImageView, nullptr);
@@ -629,8 +646,18 @@ void Vulkan_App::cleanup() {
 	vkDestroyBuffer(device, vertexBuffer, nullptr);
 	vkFreeMemory(device, vertexBufferMemory, nullptr);
 
+	vkDestroyBuffer(device, indexBuffer2, nullptr);
+	vkFreeMemory(device, indexBufferMemory2, nullptr);
+
+	vkDestroyBuffer(device, vertexBuffer2, nullptr);
+	vkFreeMemory(device, vertexBufferMemory2, nullptr);
+
 	vkDestroyPipeline(device, graphicsPipeline, nullptr);
 	vkDestroyPipelineLayout(device, pipelineLayout, nullptr);
+
+	vkDestroyPipeline(device, graphicsPipeline2, nullptr);
+	vkDestroyPipelineLayout(device, pipelineLayout2, nullptr);
+
 
 	vkDestroyRenderPass(device, renderPass, nullptr);
 
@@ -640,9 +667,13 @@ void Vulkan_App::cleanup() {
 		vkDestroyFence(device, inFlightFences[i], nullptr);
 		vkDestroyBuffer(device, uniformBuffers[i], nullptr);
 		vkFreeMemory(device, uniformBuffersMemory[i], nullptr);
+
+		vkDestroyBuffer(device, uniformBuffers2[i], nullptr);
+		vkFreeMemory(device, uniformBuffersMemory2[i], nullptr);
 	}
 
 	vkDestroyDescriptorSetLayout(device, descriptorSetLayout, nullptr);
+	vkDestroyDescriptorSetLayout(device, descriptorSetLayout2, nullptr);
 
 	vkDestroyCommandPool(device, commandPool, nullptr);	
 	
@@ -756,4 +787,8 @@ void keyboard_callback(GLFWwindow *window, int key, int scancode, int action, in
 {
 	if (key == GLFW_KEY_C && action == GLFW_PRESS)
 		trans_text *= -1;
+	if (key == GLFW_KEY_T && action == GLFW_PRESS)
+		objs.x *= -1;
+	if (key == GLFW_KEY_Q && action == GLFW_PRESS)
+		objs.y *= -1;
 }

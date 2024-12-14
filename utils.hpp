@@ -210,6 +210,25 @@ struct vector2
 	bool operator==(const vector2& other) const {
 		return x == other.x && y == other.y;
 	}
+
+	static vector2 create(float x, float y){
+		vector2 ret;
+
+		ret.x = x;
+		ret.y = y;
+
+		return (ret);
+	}
+
+	float& operator[](std::size_t idx) { 
+		if (idx == 0)
+			return x; 
+		if (idx == 1)
+			return y;
+		else
+			return y; 
+	}
+
 };
 
 struct mat4

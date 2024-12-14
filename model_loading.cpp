@@ -20,7 +20,7 @@ void Vulkan_App::fill_indices(const float tris[3], attributes att, std::vector<V
 	float width = att.lim_x.max - att.lim_y.min;
 	float height = att.lim_y.max - att.lim_y.min;
 	float thickness = att.lim_z.max - att.lim_z.min;
-	float color = float((rand() % 50)) / 100.0f;
+	float color = float((rand() % 80)) / 100.0f;
 
 	float totalw = (width * 2) + (thickness * 2);
 
@@ -58,7 +58,7 @@ void Vulkan_App::fill_indices(const float tris[3], attributes att, std::vector<V
 }
 
 void Vulkan_App::createVertexBuffer(std::vector<Vertex>& vert, VkBuffer& vertBuffer, VkDeviceMemory& vertBufferMemory) {
-	VkDeviceSize bufferSize = sizeof(vertices[0]) * vertices.size();
+	VkDeviceSize bufferSize = sizeof(vert[0]) * vert.size();
 
 	VkBuffer stagingBuffer;
 	VkDeviceMemory stagingBufferMemory;
@@ -66,7 +66,7 @@ void Vulkan_App::createVertexBuffer(std::vector<Vertex>& vert, VkBuffer& vertBuf
 
 	void* data;
 	vkMapMemory(device, stagingBufferMemory, 0, bufferSize, 0, &data);
-	memcpy(data, vertices.data(), (size_t) bufferSize);
+	memcpy(data, vert.data(), (size_t) bufferSize);
 	vkUnmapMemory(device, stagingBufferMemory);
 
 	createBuffer(bufferSize, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, vertBuffer, vertBufferMemory);
@@ -78,7 +78,7 @@ void Vulkan_App::createVertexBuffer(std::vector<Vertex>& vert, VkBuffer& vertBuf
 }
 
 void Vulkan_App::createIndexBuffer(std::vector<uint32_t> ind, VkBuffer& indBuffer, VkDeviceMemory& indBufferMemory) {
-	VkDeviceSize bufferSize = sizeof(indices[0]) * indices.size();
+	VkDeviceSize bufferSize = sizeof(ind[0]) * ind.size();
 
 	VkBuffer stagingBuffer;
 	VkDeviceMemory stagingBufferMemory;
@@ -86,7 +86,7 @@ void Vulkan_App::createIndexBuffer(std::vector<uint32_t> ind, VkBuffer& indBuffe
 
 	void* data;
 	vkMapMemory(device, stagingBufferMemory, 0, bufferSize, 0, &data);
-	memcpy(data, indices.data(), (size_t) bufferSize);
+	memcpy(data, ind.data(), (size_t) bufferSize);
 	vkUnmapMemory(device, stagingBufferMemory);
 
 	createBuffer(bufferSize, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, indBuffer, indBufferMemory);
