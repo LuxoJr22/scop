@@ -89,6 +89,9 @@ void Load_obj(attributes *att, const char *filename)
 
 	file.open(filename);
 	
+	if (!file.good())
+		throw std::runtime_error("failed to load model!");
+	
 
 	while (file.good())
 	{
