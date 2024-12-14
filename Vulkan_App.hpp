@@ -189,13 +189,32 @@ class Vulkan_App {
         std::unordered_map<Vertex, uint32_t> uniqueVertices{};
         std::vector<uint32_t> indices;
 
+        std::vector<Vertex> vertices2;
+        std::unordered_map<Vertex, uint32_t> uniqueVertices2{};
+        std::vector<uint32_t> indices2;
+
+        VkPipeline graphicsPipeline2;
+        VkPipelineLayout pipelineLayout2;
+        std::vector<VkDescriptorSet> descriptorSets2;
+        std::vector<VkBuffer> uniformBuffers2;
+        std::vector<VkDeviceMemory> uniformBuffersMemory2;
+        std::vector<void*> uniformBuffersMapped2;
+        VkDescriptorSetLayout descriptorSetLayout2;
+        VkDescriptorPool descriptorPool2;
+
+        VkBuffer vertexBuffer2;
+        VkDeviceMemory vertexBufferMemory2;
+        VkBuffer indexBuffer2;
+        VkDeviceMemory indexBufferMemory2;
+
+
         VkSurfaceFormatKHR chooseSwapSurfaceFormat(const std::vector<VkSurfaceFormatKHR>& availableFormats);
         bool checkValidationLayerSupport();
         VkPresentModeKHR chooseSwapPresentMode(const std::vector<VkPresentModeKHR>& availablePresentModes);
         VkExtent2D chooseSwapExtent(const VkSurfaceCapabilitiesKHR& capabilities);
-        void fill_indices(const float tris[3], attributes att);
+        void fill_indices(const float tris[3], attributes att, std::vector<Vertex>& vert, std::unordered_map<Vertex, uint32_t>& uniqueVert, std::vector<uint32_t>& ind);
         void createImage(uint32_t width, uint32_t height, VkFormat format, VkImageTiling tiling, VkImageUsageFlags usage, VkMemoryPropertyFlags properties, VkImage& image, VkDeviceMemory& imageMemory);
-        void loadModel();
+        void loadModel(const char * model_path, std::vector<Vertex>& verti, std::unordered_map<Vertex, uint32_t>& uniqueVert, std::vector<uint32_t>& ind);
         void cleanup();
         void initWindow();
         void initVulkan();
@@ -209,16 +228,16 @@ class Vulkan_App {
         void copyBufferToImage(VkBuffer buffer, VkImage image, uint32_t width, uint32_t height);
         void transitionImageLayout(VkImage image, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout);
         void createTextureImage();
-        void createDescriptorPool();
+        void createDescriptorPool(VkDescriptorPool& descripPool);
         VkCommandBuffer beginSingleTimeCommands();
         void endSingleTimeCommands(VkCommandBuffer commandBuffer);
-        void createDescriptorSets();
-        void createUniformBuffers();
-        void createDescriptorSetLayout();
+        void createDescriptorSets(std::vector<VkDescriptorSet>& descriptSets, std::vector<VkBuffer> uniform_Buffers, VkDescriptorSetLayout& descriptSetLayout, VkDescriptorPool descriptPool);
+        void createUniformBuffers(std::vector<VkBuffer>& uniform_buffers, std::vector<void*>& uniform_buffersMapped, std::vector<VkDeviceMemory>& uniform_buffersMemory);
+        void createDescriptorSetLayout(VkDescriptorSetLayout& descriptSetLayout);
         uint32_t findMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties);
         void createBuffer(VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties, VkBuffer& buffer, VkDeviceMemory& bufferMemory);
-        void createIndexBuffer();
-        void createVertexBuffer();
+        void createIndexBuffer(std::vector<uint32_t> ind, VkBuffer& indBuffer, VkDeviceMemory& indBufferMemory);
+        void createVertexBuffer(std::vector<Vertex>& vert, VkBuffer& vertBuffer, VkDeviceMemory& vertBufferMemory);
         void copyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size);
         void cleanupSwapChain();
         void recreateSwapChain();
@@ -230,7 +249,7 @@ class Vulkan_App {
         void createFramebuffers();
         void createRenderPass();
         VkShaderModule createShaderModule(const std::vector<char>& code);
-        void createGraphicsPipeline();
+        void createGraphicsPipeline(VkPipeline& graphPipeline, VkDescriptorSetLayout& descriptSetLayout, VkPipelineLayout& pipeline_Layout);
         void createImageViews();
         void createSwapChain();
         void createSurface();

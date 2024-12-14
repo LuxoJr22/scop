@@ -1,21 +1,21 @@
 #include "Vulkan_App.hpp"
 
-void Vulkan_App::loadModel() {
+void Vulkan_App::loadModel(const char * model_path, std::vector<Vertex>& verti, std::unordered_map<Vertex, uint32_t>& uniqueVert, std::vector<uint32_t>& ind) {
 	attributes att;
 
-	Load_obj(&att, MODEL_PATH.c_str());
+	Load_obj(&att, model_path);
 
 	center_obj(&att);
 
 
 	for (const auto& faces : att.faces) {
-		fill_indices(faces.tris[0], att);
+		fill_indices(faces.tris[0], att, verti, uniqueVert, ind);
 		if (faces.isTriangle == false)
-			fill_indices(faces.tris[1], att);
+			fill_indices(faces.tris[1], att, verti, uniqueVert, ind);
 	}
 }
 
-void Vulkan_App::fill_indices(const float tris[3], attributes att)
+void Vulkan_App::fill_indices(const float tris[3], attributes att, std::vector<Vertex>& verti, std::unordered_map<Vertex, uint32_t>& uniqueVert, std::vector<uint32_t>& ind)
 {
 	float width = att.lim_x.max - att.lim_y.min;
 	float height = att.lim_y.max - att.lim_y.min;
@@ -48,16 +48,16 @@ void Vulkan_App::fill_indices(const float tris[3], attributes att)
 
 		vertex.color = {color, .0f, .0f};
 
-		if (uniqueVertices.count(vertex) == 0) {
-			uniqueVertices[vertex] = static_cast<uint32_t>(vertices.size());
-			vertices.push_back(vertex);
+		if (uniqueVert.count(vertex) == 0) {
+			uniqueVert[vertex] = static_cast<uint32_t>(verti.size());
+			verti.push_back(vertex);
 		}
 				
-		indices.push_back(uniqueVertices[vertex]);
+		ind.push_back(uniqueVert[vertex]);
 	}
 }
 
-void Vulkan_App::createVertexBuffer() {
+void Vulkan_App::createVertexBuffer(std::vector<Vertex>& vert, VkBuffer& vertBuffer, VkDeviceMemory& vertBufferMemory) {
 	VkDeviceSize bufferSize = sizeof(vertices[0]) * vertices.size();
 
 	VkBuffer stagingBuffer;
@@ -69,15 +69,15 @@ void Vulkan_App::createVertexBuffer() {
 	memcpy(data, vertices.data(), (size_t) bufferSize);
 	vkUnmapMemory(device, stagingBufferMemory);
 
-	createBuffer(bufferSize, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, vertexBuffer, vertexBufferMemory);
+	createBuffer(bufferSize, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, vertBuffer, vertBufferMemory);
 
-	copyBuffer(stagingBuffer, vertexBuffer, bufferSize);
+	copyBuffer(stagingBuffer, vertBuffer, bufferSize);
 	
 	vkDestroyBuffer(device, stagingBuffer, nullptr);
 	vkFreeMemory(device, stagingBufferMemory, nullptr);
 }
 
-void Vulkan_App::createIndexBuffer() {
+void Vulkan_App::createIndexBuffer(std::vector<uint32_t> ind, VkBuffer& indBuffer, VkDeviceMemory& indBufferMemory) {
 	VkDeviceSize bufferSize = sizeof(indices[0]) * indices.size();
 
 	VkBuffer stagingBuffer;
@@ -89,24 +89,24 @@ void Vulkan_App::createIndexBuffer() {
 	memcpy(data, indices.data(), (size_t) bufferSize);
 	vkUnmapMemory(device, stagingBufferMemory);
 
-	createBuffer(bufferSize, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, indexBuffer, indexBufferMemory);
+	createBuffer(bufferSize, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, indBuffer, indBufferMemory);
 
-	copyBuffer(stagingBuffer, indexBuffer, bufferSize);
+	copyBuffer(stagingBuffer, indBuffer, bufferSize);
 
 	vkDestroyBuffer(device, stagingBuffer, nullptr);
 	vkFreeMemory(device, stagingBufferMemory, nullptr);
 }
 
-void Vulkan_App::createUniformBuffers() {
+void Vulkan_App::createUniformBuffers(std::vector<VkBuffer> &uniform_buffers, std::vector<void*> &uniform_buffersMapped, std::vector<VkDeviceMemory> &uniform_buffersMemory) {
 	VkDeviceSize bufferSize = sizeof(UniformBufferObject);
 
-	uniformBuffers.resize(MAX_FRAMES_IN_FLIGHT);
-	uniformBuffersMemory.resize(MAX_FRAMES_IN_FLIGHT);
-	uniformBuffersMapped.resize(MAX_FRAMES_IN_FLIGHT);
+	uniform_buffers.resize(MAX_FRAMES_IN_FLIGHT);
+	uniform_buffersMemory.resize(MAX_FRAMES_IN_FLIGHT);
+	uniform_buffersMapped.resize(MAX_FRAMES_IN_FLIGHT);
 
 	for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
-		createBuffer(bufferSize, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, uniformBuffers[i], uniformBuffersMemory[i]);
+		createBuffer(bufferSize, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, uniform_buffers[i], uniform_buffersMemory[i]);
 
-		vkMapMemory(device, uniformBuffersMemory[i], 0, bufferSize, 0, &uniformBuffersMapped[i]);
+		vkMapMemory(device, uniform_buffersMemory[i], 0, bufferSize, 0, &uniform_buffersMapped[i]);
 	}
 }
