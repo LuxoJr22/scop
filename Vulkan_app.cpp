@@ -1,6 +1,6 @@
 #include "Vulkan_App.hpp"
 
-float trans_text = 0;
+float trans_text = -1;
 
 void Vulkan_App::run() {
 	initWindow();
@@ -358,13 +358,13 @@ void Vulkan_App::updateUniformBuffer(uint32_t currentImage) {
 	auto currentTime = std::chrono::high_resolution_clock::now();
 	float time = std::chrono::duration<float, std::chrono::seconds::period>(currentTime - startTime).count();
 
-
 	UniformBufferObject ubo{};
 	ubo.model = mat4::create(1.0f);
 	ubo.model[3][0] = pos.x;
 	ubo.model[3][1] = pos.y;
 	ubo.model[3][2] = pos.z;
 	ubo.model = mat4::rotate(ubo.model, time * degToRadians(90.0f), vector3::create(0.0f, 1.0f, 0.0f));
+	//ubo.view = lookat(vector3::create( cos(c_pos.x) * 5 , c_pos.y, sin(c_pos.x) * 5 + c_pos.z), vector3::create(0.f,0.f,0.f), vector3::create(0.0f, 1.0f, 0.0f));
 	ubo.view = lookat(c_pos, vector3::create(0.f,0.f,0.f), vector3::create(0.0f, 1.0f, 0.0f));
 	ubo.proj = perspective(degToRadians(90.0f), swapChainExtent.width / (float) swapChainExtent.height, 0.1f, 20.0f);
 	ubo.proj[1][1] *= -1;
